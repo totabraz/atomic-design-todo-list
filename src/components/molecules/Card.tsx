@@ -22,7 +22,7 @@ export default function Card({
     <View style={styles.container}>
       <Checkbox
         value={isDone}
-        onValueChange={() => toggleTaskStatus(position)}
+        onValueChange={() => toggleTaskStatus()}
       />
       <Text text={title} style={[styles.title, isDone ? styles.isDone : {}]} />
       <Text text={`#${position}`} style={styles.position} />
