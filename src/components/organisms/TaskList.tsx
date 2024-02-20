@@ -1,11 +1,9 @@
-import { FlatList, FlatListProps, StyleSheet, Text, View } from "react-native";
 import React, { useState } from "react";
-import Card, { CardContentProps } from "../molecules/Card";
-import TouchableButton from "../atoms/TouchableButton";
-import AnimationSwipe from "../atoms/AnimationSwipe";
+import { FlatList, StyleSheet, View } from "react-native";
+import Card, { CheckCardContentProps } from "../molecules/CheckCard";
 
 type TaskListProps = {
-  data: Array<CardContentProps>;
+  data: Array<CheckCardContentProps>;
   toggleTaskStatus: (i?: number, isDone?: boolean) => void;
 };
 
@@ -13,7 +11,8 @@ export default function TaskList({ data, toggleTaskStatus }: TaskListProps) {
   const [isScrollEnabled, setScrollEnable] = useState(true);
 
   const helperToggleStatus = (position?: number, isDone?: boolean) => {
-    toggleTaskStatus(position, isDone);
+    if (isDone === undefined) toggleTaskStatus(position);
+    else toggleTaskStatus(position, isDone);
   };
 
   const handleScrollStatus = () => {
@@ -29,23 +28,15 @@ export default function TaskList({ data, toggleTaskStatus }: TaskListProps) {
         renderItem={({ item }) => {
           const { title, isDone, position } = item;
           return (
-            <AnimationSwipe
-              key={position}
-              toggleOnAnimation={handleScrollStatus}
-              onSwipeLeft={() => {
-                helperToggleStatus(position, true);
-              }}
-              onSwipeRight={() => {
-                helperToggleStatus(position, false);
-              }}
-            >
-              <Card
-                title={title}
-                isDone={isDone}
-                position={position}
-                toggleTaskStatus={() => helperToggleStatus(position)}
-              />
-            </AnimationSwipe>
+            <Card
+              title={title}
+              isDone={isDone}
+              position={position}
+              handleScrollStatus={() => handleScrollStatus()}
+              toggleTaskStatus={() => helperToggleStatus(position)}
+              onSwipeLeft={() => helperToggleStatus(position, false)}
+              onSwipeRight={() => helperToggleStatus(position, true)}
+            />
           );
         }}
       />

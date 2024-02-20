@@ -4,9 +4,9 @@ import {
   Dimensions,
   LayoutAnimation,
   PanResponder,
+  StyleSheetProperties,
   UIManager,
 } from "react-native";
-import { SPACES } from "../../constants/sizes";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_THRESHOLD = 0.05 * Dimensions.get("window").width;
@@ -16,7 +16,7 @@ const DIRECTION_LEFT = "left";
 
 type directionProps = "right" | "left";
 type AnimationSwipeProps = {
-  toggleOnAnimation?: () => void;
+  handleScrollStatus?: () => void;
   onSwipeRight?: () => void;
   onSwipeLeft?: () => void;
   children: JSX.Element | JSX.Element[];
@@ -24,7 +24,7 @@ type AnimationSwipeProps = {
 
 const AnimationSwipe = ({
   children,
-  toggleOnAnimation = () => {},
+  handleScrollStatus = () => {},
   onSwipeRight = () => {},
   onSwipeLeft = () => {},
 }: AnimationSwipeProps) => {
@@ -40,7 +40,7 @@ const AnimationSwipe = ({
     PanResponder.create({
       onMoveShouldSetPanResponderCapture: () => true,
       onStartShouldSetPanResponder: (_, gesture) => {
-        toggleOnAnimation();
+        handleScrollStatus();
         return true;
       },
       onPanResponderMove: Animated.event([null, { dx: position.x }], {
@@ -55,19 +55,23 @@ const AnimationSwipe = ({
         resetPosition();
       },
       onPanResponderTerminationRequest: () => {
-        toggleOnAnimation();
+        handleScrollStatus();
         return true;
       },
     })
   ).current;
 
   const getCardStyle = () => {
-    const rotate = position.x.interpolate({
-      inputRange: [-5 * SCREEN_WIDTH, 0, 5 * SCREEN_WIDTH],
-      outputRange: ["-00deg", "0deg", "00deg"],
-    });
     return {
-      transform: [...position.getTranslateTransform(), { rotate }],
+       transform: [{
+        translateX: position.x.interpolate({
+            inputRange: [ - SCREEN_WIDTH /3, 0, SCREEN_WIDTH /3 ],
+            outputRange: [ - SCREEN_WIDTH /3, 0, SCREEN_WIDTH /3 ],
+            extrapolate: 'clamp'
+        })
+    }],
+      
+
     };
   };
 
@@ -84,7 +88,8 @@ const AnimationSwipe = ({
   };
 
   const forceSwipe = (direction: directionProps = DIRECTION_RIGHT) => {
-    const x = direction === DIRECTION_RIGHT ? SCREEN_WIDTH : -SCREEN_WIDTH;
+    const moveLimit = SCREEN_WIDTH / 3;
+    const x = direction === DIRECTION_RIGHT ? moveLimit : -moveLimit;
     Animated.timing(position, {
       useNativeDriver: true,
       toValue: { x, y: 0 },
@@ -95,20 +100,10 @@ const AnimationSwipe = ({
   };
 
   return (
-    <Animated.View
-      style={[
-        {
-          marginBottom: SPACES.XL,
-        },
-        getCardStyle(),
-      ]}
-      {...panResponder.panHandlers}
-    >
+    <Animated.View style={getCardStyle()} {...panResponder.panHandlers}>
       {children}
     </Animated.View>
   );
 };
 
 export default AnimationSwipe;
-
-

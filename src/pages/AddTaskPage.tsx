@@ -1,10 +1,9 @@
-import { StyleSheet, Text, View } from "react-native";
 import React, { useState } from "react";
+import { CheckCardContentProps } from "../components/molecules/CheckCard";
 import TAddTask from "../components/templates/TAddTask";
-import { CardContentProps } from "../components/molecules/Card";
 
 export default function AddTaskPage() {
-  const [tasks, setTasks] = useState<Array<CardContentProps>>([]);
+  const [tasks, setTasks] = useState<Array<CheckCardContentProps>>([]);
   const [inputValue, setInputValue] = useState("");
 
   const addTask = (newTask?: string) => {
@@ -23,7 +22,9 @@ export default function AddTaskPage() {
       const index = Number(taskPosition) - 1;
       setTasks((prev) => {
         const updState = [...prev];
-        updState[index] = { ...updState[index], isDone: isDone };
+        const checkIsDone =
+          isDone === undefined ? !updState[index].isDone : isDone;
+        updState[index] = { ...updState[index], isDone: checkIsDone };
         return updState;
       });
     }

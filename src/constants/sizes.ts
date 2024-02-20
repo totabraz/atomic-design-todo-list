@@ -8,5 +8,5 @@ export const SPACES = {
   SM: 10,
   MD: 15,
   XL: 20,
-  XLL: 30,
+  XXL: 30,
 };
