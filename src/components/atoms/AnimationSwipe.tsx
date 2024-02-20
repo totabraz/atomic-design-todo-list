@@ -4,28 +4,29 @@ import {
   Dimensions,
   LayoutAnimation,
   PanResponder,
-  UIManager
+  UIManager,
 } from "react-native";
+import { SPACES } from "../../constants/sizes";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const SCREEN_THRESHOLD = 5;
+const SCREEN_THRESHOLD = 0.05 * Dimensions.get("window").width;
 const SWIPE_OUT_DURATION = 250;
 const DIRECTION_RIGHT = "right";
 const DIRECTION_LEFT = "left";
 
+type directionProps = "right" | "left";
 type AnimationSwipeProps = {
+  toggleOnAnimation?: () => void;
   onSwipeRight?: () => void;
   onSwipeLeft?: () => void;
-  onCompleteFunction?: (props?: any) => void;
   children: JSX.Element | JSX.Element[];
 };
-type directionProps = "right" | "left";
 
 const AnimationSwipe = ({
   children,
+  toggleOnAnimation = () => {},
   onSwipeRight = () => {},
   onSwipeLeft = () => {},
-  onCompleteFunction = () => {},
 }: AnimationSwipeProps) => {
   const position = useRef(new Animated.ValueXY()).current;
 
@@ -37,21 +38,25 @@ const AnimationSwipe = ({
 
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onPanResponderMove: Animated.event(
-        [null, { dx: position.x, dy: position.y }],
-        {
-          useNativeDriver: false,
-        }
-      ),
-      onPanResponderRelease: (event, gesture) => {
-        if (gesture.dx > SCREEN_THRESHOLD) {
+      onMoveShouldSetPanResponderCapture: () => true,
+      onStartShouldSetPanResponder: (_, gesture) => {
+        toggleOnAnimation();
+        return true;
+      },
+      onPanResponderMove: Animated.event([null, { dx: position.x }], {
+        useNativeDriver: false,
+      }),
+      onPanResponderRelease: (event, { dx, vx }) => {
+        if (dx > SCREEN_THRESHOLD) {
           forceSwipe(DIRECTION_RIGHT);
-        } else if (gesture.dx < -SCREEN_THRESHOLD) {
+        } else if (dx < -SCREEN_THRESHOLD) {
           forceSwipe(DIRECTION_LEFT);
-        } else {
-          resetPosition();
         }
+        resetPosition();
+      },
+      onPanResponderTerminationRequest: () => {
+        toggleOnAnimation();
+        return true;
       },
     })
   ).current;
@@ -59,7 +64,7 @@ const AnimationSwipe = ({
   const getCardStyle = () => {
     const rotate = position.x.interpolate({
       inputRange: [-5 * SCREEN_WIDTH, 0, 5 * SCREEN_WIDTH],
-      outputRange: ["-40deg", "0deg", "40deg"],
+      outputRange: ["-00deg", "0deg", "00deg"],
     });
     return {
       transform: [...position.getTranslateTransform(), { rotate }],
@@ -76,7 +81,6 @@ const AnimationSwipe = ({
   const onSwipeComplete = (direction: directionProps) => {
     direction === DIRECTION_RIGHT ? onSwipeRight() : onSwipeLeft();
     position.setValue({ x: 0, y: 0 });
-    onCompleteFunction();
   };
 
   const forceSwipe = (direction: directionProps = DIRECTION_RIGHT) => {
@@ -91,10 +95,20 @@ const AnimationSwipe = ({
   };
 
   return (
-    <Animated.View style={getCardStyle()} {...panResponder.panHandlers}>
+    <Animated.View
+      style={[
+        {
+          marginBottom: SPACES.XL,
+        },
+        getCardStyle(),
+      ]}
+      {...panResponder.panHandlers}
+    >
       {children}
     </Animated.View>
   );
 };
 
 export default AnimationSwipe;
+
+

@@ -18,14 +18,12 @@ export default function AddTaskPage() {
     }
   };
 
-  const toggleTaskStatus = (taskPosition?: number) => {
-    console.log("toggleTaskStatus", taskPosition);
-
+  const toggleTaskStatus = (taskPosition?: number, isDone?: boolean) => {
     if (taskPosition) {
       const index = Number(taskPosition) - 1;
       setTasks((prev) => {
         const updState = [...prev];
-        updState[index] = { ...updState[index], isDone: !updState[index].isDone };
+        updState[index] = { ...updState[index], isDone: isDone };
         return updState;
       });
     }

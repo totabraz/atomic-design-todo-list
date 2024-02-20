@@ -10,7 +10,7 @@ type TAddTaskProps = {
   inputValue: string | undefined;
   setInputValue: (t: string) => void;
   addTask: (t?: string) => void;
-  toggleTaskStatus: (i?: number) => void;
+  toggleTaskStatus: (i?: number, isDone?: boolean) => void;
 };
 
 export default function TAddTask({
@@ -33,7 +33,7 @@ export default function TAddTask({
         onChangeText={setInputValue}
         addTask={addTask}
       />
-      <View style={{ marginBottom: SPACES.MD, maxHeight: 500 }}>
+      <View style={{ marginBottom: SPACES.MD }}>
         <TaskList data={data} toggleTaskStatus={toggleTaskStatus} />
       </View>
     </View>
